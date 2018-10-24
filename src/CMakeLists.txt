@@ -117,6 +117,8 @@ elseif(${PLATFORM} MATCHES "Raspberry Pi")
   set(PLATFORM_CPP "PLATFORM_RPI")
   set(GRAPHICS "GRAPHICS_API_OPENGL_ES2")
 
+  set(LIBS_PRIVATE ${LIBS_PRIVATE} m /opt/vc/lib/libEGL.so /opt/vc/lib/libGLESv2.so /opt/vc/lib/libbcm_host.so)
+  add_definitions(-D_GNU_SOURCE=1 -I/opt/vc/include)
 endif()
 
 if (${OPENGL_VERSION})
