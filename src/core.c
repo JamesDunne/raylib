@@ -686,12 +686,17 @@ void CloseWindow(void)
 
     for (int i = 0; i < sizeof(eventWorkers)/sizeof(InputEventWorker); ++i)
     {
-        if (eventWorkers[i].threadId == 0)
-        {
-            pthread_join(eventWorkers[i].threadId, NULL);
-        }
+        if (eventWorkers[i].threadId == 0) continue;
+
+		// Close the file descriptor to end the blocking read:
+		close(eventWorkers[i].fd);
+		pthread_join(eventWorkers[i].threadId, NULL);
     }
-    pthread_join(gamepadThreadId, NULL);
+
+	if (gamepadThreadId != 0)
+	{
+    	pthread_join(gamepadThreadId, NULL);
+    }
 #endif
 
     TraceLog(LOG_INFO, "Window closed successfully");
@@ -3747,9 +3752,11 @@ static void InitKeyboard(void)
 {
     // NOTE: We read directly from Standard Input (stdin) - STDIN_FILENO file descriptor
 
+#if !defined(SUPPORT_EVENTS_WAITING)
     // Make stdin non-blocking (not enough, need to configure to non-canonical mode)
     int flags = fcntl(STDIN_FILENO, F_GETFL, 0);          // F_GETFL: Get the file access mode and the file status flags
     fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);     // F_SETFL: Set the file status flags to the value specified
+#endif
 
     // Save terminal keyboard settings and reconfigure terminal with new settings
     struct termios keyboardNewSettings;
