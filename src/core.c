@@ -3984,7 +3984,7 @@ static void EventThreadSpawn(char *device)
     }
 
     // Open the device
-    fd = open(device, O_RDONLY | O_NONBLOCK);
+    fd = open(device, O_RDONLY);
     if (fd < 0)
     {
         TraceLog(LOG_WARNING, "Error creating input device thread for '%s': Can't open device (Err: %d)", device, worker->fd);
@@ -4255,10 +4255,6 @@ static void *EventThread(void *arg)
                 ProcessGestureEvent(gestureEvent);
             }
         }
-        else
-        {
-            usleep(5000); // Sleep for 5ms to avoid hogging CPU time
-        }
     }
 
     close(worker->fd);
@@ -4275,7 +4271,7 @@ static void InitGamepad(void)
     {
         sprintf(gamepadDev, "%s%i", DEFAULT_GAMEPAD_DEV, i);
 
-        if ((gamepadStream[i] = open(gamepadDev, O_RDONLY|O_NONBLOCK)) < 0)
+        if ((gamepadStream[i] = open(gamepadDev, O_RDONLY)) < 0)
         {
             // NOTE: Only show message for first gamepad
             if (i == 0) TraceLog(LOG_WARNING, "Gamepad device could not be opened, no gamepad available");
@@ -4345,10 +4341,6 @@ static void *GamepadThread(void *arg)
                         gamepadAxisState[i][gamepadEvent.number] = (float)gamepadEvent.value/32768;
                     }
                 }
-            }
-            else
-            {
-                usleep(1000); //Sleep for 1ms to avoid hogging CPU time
             }
         }
     }
